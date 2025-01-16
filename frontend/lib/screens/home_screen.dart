@@ -10,7 +10,7 @@ class HomeScreen extends ConsumerWidget {
 
     return itemsState.when(
       data: (items) => Scaffold(
-        appBar: AppBar(title: const Text('タスクアプリ')),
+        appBar: AppBar(title: const Text('タスク管アプリ')),
         body: Column(
           children: [
             const SearchBarWidget(),
@@ -20,7 +20,7 @@ class HomeScreen extends ConsumerWidget {
         bottomNavigationBar: _buildBottomNavigationBar(context),
       ),
       loading: () => Scaffold(
-        appBar: AppBar(title: const Text('タスクアプリ')),
+        appBar: AppBar(title: const Text('タスク管アプリ')),
         body: const Center(child: CircularProgressIndicator()),
         bottomNavigationBar: _buildBottomNavigationBar(context),
       ),
