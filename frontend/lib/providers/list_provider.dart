@@ -10,7 +10,6 @@ class ListNotifier extends _$ListNotifier {
 
   // Dioインスタンスの初期化
   void _initializeDio() {
-    print("============init");
     dio = Dio(BaseOptions(
        baseUrl: 'http://localhost:3000/',// APIのベースURL
       connectTimeout: Duration(milliseconds: 5000), // タイムアウト設定
@@ -106,7 +105,7 @@ Future<ToDoItem> modifyItem(int id, ToDoItem updatedItem) async {
 
           return AsyncValue.data(updatedItems); // 更新したリストを返す
         },
-        loading: () => AsyncValue.loading(),
+        loading: () => const AsyncValue.loading(),
         error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
       );
 
@@ -133,7 +132,7 @@ Future<void> deleteItem(ToDoItem item) async {
           final updatedItems = items.where((existingItem) => existingItem.id != item.id).toList();
           return AsyncValue.data(updatedItems); // 更新されたリストを返す
         },
-        loading: () => AsyncValue.loading(),
+        loading: () => const AsyncValue.loading(),
         error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
       );
     } else {

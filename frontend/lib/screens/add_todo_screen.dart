@@ -15,7 +15,7 @@ class AddToDoScreen extends ConsumerWidget {
     final addItemState = ref.watch(listNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text('タスク管理アプリ / 追加')),
+      appBar: AppBar(title: const Text('タスク管理アプリ / 追加')),
       body: addItemState.when(
         // データが正常に取得できた場合
         data: (items) {
@@ -23,18 +23,49 @@ class AddToDoScreen extends ConsumerWidget {
             children: [
               TextField(
                 controller: taskNameController,
-                decoration: InputDecoration(hintText: 'タスク名'),
+                decoration: const InputDecoration(hintText: 'タスク名'),
               ),
               TextField(
                 controller: detailsController,
-                decoration: InputDecoration(hintText: '詳細'),
+                decoration: const InputDecoration(hintText: '詳細'),
               ),
               TextField(
                 controller: statusController,
-                decoration: InputDecoration(hintText: 'ステータス'),
+                decoration: const InputDecoration(hintText: 'ステータス'),
               ),
-              ElevatedButton(
-                onPressed: () async {
+              AddTaskButton(taskNameController: taskNameController, detailsController: detailsController, statusController: statusController)
+            ],
+          );
+        },
+        // ローディング中の場合
+        loading: () => const Center(child: CircularProgressIndicator()),
+        // エラーの場合
+        error: (error, stackTrace) => Center(
+          child: Text('タスクの取得中にエラーが発生しました: $error'),
+        ),
+      ),
+      bottomNavigationBar: _buildBottomNavigationBar(context),
+    );
+  }
+}
+
+
+class AddTaskButton extends ConsumerWidget {
+  final TextEditingController taskNameController;
+  final TextEditingController detailsController;
+  final TextEditingController statusController;
+  
+  const AddTaskButton({
+    Key? key,
+    required this.taskNameController,
+    required this.detailsController,
+    required this.statusController,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ElevatedButton(
+      onPressed: () async{
                   final notifier = ref.read(listNotifierProvider.notifier);
                   final newItem = ToDoItem(
                     id: DateTime.now().day,// 仮のID（サーバー側で生成される場合は変更）
@@ -53,42 +84,29 @@ class AddToDoScreen extends ConsumerWidget {
                       SnackBar(content: Text('タスクの追加に失敗しました')),
                     );
                   }
-                },
-                child: Text('登録'),
-              ),
-            ],
-          );
-        },
-        // ローディング中の場合
-        loading: () => Center(child: CircularProgressIndicator()),
-        // エラーの場合
-        error: (error, stackTrace) => Center(
-          child: Text('タスクの取得中にエラーが発生しました: $error'),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'ToDo作成'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'プロフィール'),
-        ],
-        currentIndex: 1, // ToDo作成画面なので1に設定
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              context.go('/'); // ホームに遷移
-              break;
-            case 1:
-              // 現在の画面なので何もしない
-              break;
-            case 2:
-              context.go('/profile'); // プロフィール画面に遷移（仮の遷移先）
-              break;
-          }
-        },
-      ),
+                }, 
+      child: Text('登録'),
     );
   }
 }
 
 
+BottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
+    return BottomNavigationBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
+        BottomNavigationBarItem(icon: Icon(Icons.add), label: 'ToDo作成'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'プロフィール'),
+      ],
+      currentIndex: 0,
+      onTap: (index) {
+        if (index == 0){
+          context.go('/');
+        }
+        if (index == 1) {
+          context.go('/add');
+        }
+        // 他の画面への遷移も実装可能
+      },
+    );
+  }

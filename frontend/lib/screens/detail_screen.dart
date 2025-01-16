@@ -23,17 +23,13 @@ class DetailScreen extends ConsumerWidget {
               final items = itemsState.asData?.value;
 
               // idをintに変換できるか確認し、アイテムを削除
-              if (items != null && id != null) {
+              if (items != null ) {
                   final itemToDeletelist = items.where((item) => item.id == id );
                   final itemToDelete = itemToDeletelist.first;
-                
-                if (itemToDelete != null) {
                   // アイテムを削除
                   await ref.read(listNotifierProvider.notifier).deleteItem(itemToDelete);
-
                   // 削除後にホーム画面に遷移
                   context.go('/');
-                }
               }
             },
           ),
@@ -49,16 +45,15 @@ class DetailScreen extends ConsumerWidget {
             );
           }
 
-          // idをintに変換できるか確認し、アイテムを取得
-          final index = id;
-          if (index == null || index < 0 ) {
-            return const Center(
-              child: Text('無効なIDです。タスクが見つかりません。'),
-            );
-          }
+          
 
           // アイテムが見つかった場合
-          final selectedItemlist = items.where((item) => item.id == index); 
+          final selectedItemlist = items.where((item) => item.id == id);
+          if (selectedItemlist.isEmpty){
+               return const Center(
+                child: Text('このIDは見つかりません'),
+               );
+          }
           final selectedItem2 = selectedItemlist.first;// 一致するアイテムが見つからなかった場合は null を返す
           final TextEditingController taskNameController = TextEditingController(text: selectedItem2.title);
           final TextEditingController detailsController = TextEditingController(text: selectedItem2.description);
@@ -71,26 +66,26 @@ class DetailScreen extends ConsumerWidget {
               children: [
                 TextField(
                   controller: taskNameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'タスク名',
                     border: OutlineInputBorder(),
                   ),
                   readOnly: true,
                 ),
-                SizedBox(height: 16),
+               const SizedBox(height: 16),
                 TextField(
                   controller: detailsController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: '詳細',
                     border: OutlineInputBorder(),
                   ),
                   readOnly: true,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextField(
                   controller: statusController,
-                  decoration: InputDecoration(
-                    labelText: '状態',
+                  decoration: const InputDecoration(
+                   labelText: '状態',
                     border: OutlineInputBorder(),
                   ),
                   readOnly: true,
@@ -104,30 +99,32 @@ class DetailScreen extends ConsumerWidget {
         // エラーの場合
         error: (error, stackTrace) => Center(child: Text('データの取得に失敗しました: $error')),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'ToDo作成'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'プロフィール'),
-        ],
-        currentIndex: 0, // ホームが選択されている状態
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              context.go('/'); // ホームに遷移
-              break;
-            case 1:
-              context.go('/add'); // ToDo作成画面に遷移
-              break;
-            case 2:
-              context.go('/profile'); // プロフィール画面に遷移（仮の遷移先）
-              break;
-          }
-        },
-      ),
+      bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
 }
+
+
+
+BottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
+    return BottomNavigationBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
+        BottomNavigationBarItem(icon: Icon(Icons.add), label: 'ToDo作成'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'プロフィール'),
+      ],
+      currentIndex: 0,
+      onTap: (index) {
+        if (index == 0){
+          context.go('/');
+        }
+        if (index == 1) {
+          context.go('/add');
+        }
+        // 他の画面への遷移も実装可能
+      },
+    );
+  }
 
 
 
