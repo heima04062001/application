@@ -4,79 +4,138 @@ import '../providers/list_provider.dart';
 import '../models/todo_item.dart';
 import 'package:go_router/go_router.dart';
 
-class EditToDoScreen extends ConsumerWidget {
-  final int id;
+class EditToDoScreen extends ConsumerStatefulWidget {
+  final ToDoItem item;
 
-  EditToDoScreen({required this.id});
+  EditToDoScreen({required this.item});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 非同期状態を監視
-    final state = ref.watch(listNotifierProvider);
+  _EditToDoScreenState createState() => _EditToDoScreenState();
+}
 
-    return state.when(
-      // データが正常に取得できた場合
-      data: (items) {
-        // アイテムをリストから取得
-        final item = items.firstWhere(
-          (item) => item.id == id,
-           // アイテムが見つからない場合
-        );
-        // コントローラーの初期化
-        final TextEditingController titleController = TextEditingController(text: item.title);
-        final TextEditingController descriptionController = TextEditingController(text: item.description);
-        final TextEditingController statusController = TextEditingController(text: item.status);
+class _EditToDoScreenState extends ConsumerState<EditToDoScreen> {
+  late TextEditingController titleController;
+  late TextEditingController descriptionController;
+  late TextEditingController statusController;
+  late  ToDoItem item; 
+  @override
+  void initState() {
+    super.initState();
+    // 初期化: 渡された ToDoItem を基に TextEditingController を設定
+    item = widget.item;
+    titleController = TextEditingController(text:item.title);
+    descriptionController = TextEditingController(text:item.description);
+    statusController = TextEditingController(text: item.status ? '完了' : '未完了');
+  }
 
-        // アイテムが見つからない場合
-        if (items.isEmpty) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('タスク管理アプリ / 編集')),
-            body: const Center(child: Text('指定されたタスクが見つかりませんでした。')),
-          );
-        }
+  @override
+  void dispose() {
+    // コントローラーを解放
+    titleController.dispose();
+    descriptionController.dispose();
+    statusController.dispose();
+    super.dispose();
+  }
 
-        return Scaffold(
-          appBar: AppBar(title: const Text('タスク管理アプリ / 編集')),
-          body: Column(
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(hintText: 'タスク名'),
-              ),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(hintText: '詳細'),
-              ),
-              TextField(
-                controller: statusController,
-                decoration: const InputDecoration(hintText: 'ステータス'),
-              ),
-              UpdateTaskButton(item: item,
-                               titleController: titleController,
-                               descriptionController: descriptionController,
-                               statusController: statusController,),
-            ],
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('タスク管理アプリ / 編集'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () async {
+              // アイテムを削除
+              context.go('/'); // 削除後にホーム画面に遷移
+            },
           ),
-          bottomNavigationBar: _buildBottomNavigationBar(context),
-        );
-      },
-      // ローディング中の場合
-      loading: () => const Center(child: CircularProgressIndicator()),
-      // エラーの場合
-      error: (error, stackTrace) => Center(
-        child: Text('タスクの取得中にエラーが発生しました: $error'),
+        ],
       ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'タスク名',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: '詳細',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 状態を選択するためのDropdownButton
+                DropdownButton<String>(
+                  value: statusController.text,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      statusController.text = newValue!;
+                    });
+                  },
+                  items: <String>['未完了', '完了']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+                // 更新ボタン
+                UpdateTaskButton(
+                  item: widget.item,
+                  titleController: titleController,
+                  descriptionController: descriptionController,
+                  statusController: statusController,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: _buildBottomNavigationBar(context),
+    );
+  }
+
+  // BottomNavigationBar
+  BottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
+    return BottomNavigationBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
+        BottomNavigationBarItem(icon: Icon(Icons.add), label: 'ToDo作成'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'プロフィール'),
+      ],
+      currentIndex: 0,
+      onTap: (index) {
+        if (index == 1) {
+          context.go('/add');
+        }
+        if (index == 0) {
+          context.go('/');
+        }
+        // 他の画面への遷移も実装可能
+      },
     );
   }
 }
-
 
 class UpdateTaskButton extends ConsumerWidget {
   final ToDoItem item;
   final TextEditingController titleController;
   final TextEditingController descriptionController;
   final TextEditingController statusController;
-  
+
   const UpdateTaskButton({
     Key? key,
     required this.item,
@@ -89,21 +148,19 @@ class UpdateTaskButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ElevatedButton(
       onPressed: () async {
-        // 更新したタスク情報を作成
+        // 更新後のタスクを作成
         final updatedItem = ToDoItem(
           id: item.id,
           title: titleController.text,
           description: descriptionController.text,
-          status: statusController.text,
+          status: statusController.text == '完了', // ステータスを "完了" または "未完了" に変換
         );
 
-        // Dio を使ってサーバー側で更新
         try {
-          final notifier = ref.read(listNotifierProvider.notifier);
-          await notifier.modifyItem(item.id, updatedItem); // サーバー更新
+           ref.read(modifyItemProvider(updatedItem)); // アイテムをサーバーで更新
+           ref.watch(fetchItemsProvider);
           context.go('/'); // 更新後にホーム画面に遷移
         } catch (e) {
-          // エラーハンドリング
           print('Error: $e');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('タスクの更新に失敗しました')),
@@ -115,27 +172,6 @@ class UpdateTaskButton extends ConsumerWidget {
   }
 }
 
-
-
-BottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
-    return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
-        BottomNavigationBarItem(icon: Icon(Icons.add), label: 'ToDo作成'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'プロフィール'),
-      ],
-      currentIndex: 0,
-      onTap: (index) {
-        if (index == 1) {
-          context.go('/add');
-        }
-        if (index == 0){
-          context.go('/');
-        }
-        // 他の画面への遷移も実装可能
-      },
-    );
-  }
 
 
 

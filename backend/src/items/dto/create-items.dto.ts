@@ -1,5 +1,5 @@
 // src/item/dto/create-item.dto.ts
-import { IsString, IsNotEmpty, IsNumber, Min, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, Min, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateItemDto {
 
@@ -10,7 +10,7 @@ export class CreateItemDto {
   @IsNumber()
   description: string;  // アイテムの価格
 
-  @IsString()
+  @IsBoolean()
   @IsNotEmpty()
-  status: string;  // アイテムのカテゴリー
+  status: boolean;  // アイテムのカテゴリー
 }

@@ -1,5 +1,5 @@
 // src/item/dto/update-item.dto.ts
-import { IsString, IsOptional, IsNumber, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, Min, IsBoolean } from 'class-validator';
 
 export class UpdateItemDto {
 
@@ -11,7 +11,7 @@ export class UpdateItemDto {
   @IsOptional()
   description?: string;  // アイテムの価格（任意）
 
-  @IsString()
+  @IsBoolean()
   @IsOptional()
-  status?: string;  // アイテムのカテゴリー（任意）
+  status?: boolean;  // アイテムのカテゴリー（任意）
 }

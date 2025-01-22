@@ -23,7 +23,7 @@ mixin _$ToDoItem {
   int get id => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
-  String get status => throw _privateConstructorUsedError;
+  bool get status => throw _privateConstructorUsedError;
 
   /// Serializes this ToDoItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -40,7 +40,7 @@ abstract class $ToDoItemCopyWith<$Res> {
   factory $ToDoItemCopyWith(ToDoItem value, $Res Function(ToDoItem) then) =
       _$ToDoItemCopyWithImpl<$Res, ToDoItem>;
   @useResult
-  $Res call({int id, String title, String description, String status});
+  $Res call({int id, String title, String description, bool status});
 }
 
 /// @nodoc
@@ -79,7 +79,7 @@ class _$ToDoItemCopyWithImpl<$Res, $Val extends ToDoItem>
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
-              as String,
+              as bool,
     ) as $Val);
   }
 }
@@ -92,7 +92,7 @@ abstract class _$$ToDoItemImplCopyWith<$Res>
       __$$ToDoItemImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int id, String title, String description, String status});
+  $Res call({int id, String title, String description, bool status});
 }
 
 /// @nodoc
@@ -129,7 +129,7 @@ class __$$ToDoItemImplCopyWithImpl<$Res>
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
-              as String,
+              as bool,
     ));
   }
 }
@@ -153,7 +153,7 @@ class _$ToDoItemImpl implements _ToDoItem {
   @override
   final String description;
   @override
-  final String status;
+  final bool status;
 
   @override
   String toString() {
@@ -197,7 +197,7 @@ abstract class _ToDoItem implements ToDoItem {
       {required final int id,
       required final String title,
       required final String description,
-      required final String status}) = _$ToDoItemImpl;
+      required final bool status}) = _$ToDoItemImpl;
 
   factory _ToDoItem.fromJson(Map<String, dynamic> json) =
       _$ToDoItemImpl.fromJson;
@@ -209,7 +209,7 @@ abstract class _ToDoItem implements ToDoItem {
   @override
   String get description;
   @override
-  String get status;
+  bool get status;
 
   /// Create a copy of ToDoItem
   /// with the given fields replaced by the non-null parameter values.

@@ -6,27 +6,33 @@ import 'package:go_router/go_router.dart';
 class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final itemsState = ref.watch(listNotifierProvider);
+  final itemsState = ref.watch(fetchItemsProvider);
 
-    return itemsState.when(
-      data: (items) => Scaffold(
-        appBar: AppBar(title: const Text('タスク管アプリ')),
-        body: Column(
-          children: [
-            const SearchBarWidget(),
-            TaskListWidget(tasks: items),
-          ],
-        ),
-        bottomNavigationBar: _buildBottomNavigationBar(context),
+  return Scaffold(
+    appBar: itemsState.when(
+      data: (_) => AppBar(title: const Text('タスク管アプリ')),
+      loading: () => AppBar(title: const Text('タスク管アプリ (読み込み中)')),
+      error: (err, stack) {
+  print('Error: $err');
+  print('Stack trace: $stack');
+  return AppBar(title: const Text('タスク管理アプリ (エラー発生)'));
+}
+
+    ),
+    body: itemsState.when(
+      data: (items) => Column(
+        children: [
+          const SearchBarWidget(),
+          TaskListWidget(tasks: items),
+        ],
       ),
-      loading: () => Scaffold(
-        appBar: AppBar(title: const Text('タスク管アプリ')),
-        body: const Center(child: CircularProgressIndicator()),
-        bottomNavigationBar: _buildBottomNavigationBar(context),
-      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => const SizedBox(),
-    );
-  }
+    ),
+    bottomNavigationBar: _buildBottomNavigationBar(context),
+  );
+}
+
 
   // BottomNavigationBarのビルドメソッド
   BottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
@@ -80,7 +86,7 @@ class TaskListWidget extends StatelessWidget {
           final item = tasks[index];
           return ListTile(
             title: Text(item.title),
-            subtitle: Text('ステータス: ${item.status}'),
+            subtitle: Text('ステータス: ${item.status? '完了' : '未完了'}'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

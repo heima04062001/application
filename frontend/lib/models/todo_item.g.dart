@@ -11,7 +11,7 @@ _$ToDoItemImpl _$$ToDoItemImplFromJson(Map<String, dynamic> json) =>
       id: (json['id'] as num).toInt(),
       title: json['title'] as String,
       description: json['description'] as String,
-      status: json['status'] as String,
+      status: json['status'] as bool,
     );
 
 Map<String, dynamic> _$$ToDoItemImplToJson(_$ToDoItemImpl instance) =>
